@@ -7,6 +7,9 @@
 #include <vector>
 #include <map>
 #include <cmath>
+#include <sstream>
+
+#include "FileManager.h"
 
 using namespace std;
 
@@ -14,7 +17,6 @@ class Fractals
 {
     private:
     static const double EulerConstant;
-    static const string BASE_DIR;
     static const double WIDTH;
     static const double HEIGHT;
     static const int CUTOFF_VALUE;

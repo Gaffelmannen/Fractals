@@ -65,7 +65,7 @@ vector<int> Fractals::CalculateValue(int a, int b)
     
     unsigned int numberOfIterations = 0;
     
-    while (abs(z) < 8.0 && numberOfIterations <= Fractals::CUTOFF_VALUE)
+    while (abs(z) < 4.0 && numberOfIterations <= Fractals::CUTOFF_VALUE)
     {
            z = z * z + point;
            numberOfIterations++;
@@ -76,36 +76,21 @@ vector<int> Fractals::CalculateValue(int a, int b)
 
 void Fractals::DrawMandelbrotSet(std::string filename)
 {
-    string path = "data/" + filename + ".ppm";
+    vector<string> rows;
     
-    ofstream theImage(path);
+    for (int i = 0; i < Fractals::WIDTH; i++)
+    {
+         for (int j = 0; j < Fractals::HEIGHT; j++)
+         {
+             vector<int> pos = Fractals::CalculateValue(i, j);
+             char row[100];
+             sprintf(row, "%i %i %i \n", pos[0], pos[1], pos[2]);
+             rows.push_back(row);
+         }
+    }
     
-    if (theImage.is_open ())
-    {
-        theImage
-            << "P3\n" << Fractals::WIDTH
-            << " " << Fractals::HEIGHT
-            << " 255\n";
-        
-        cout << "Working" << endl;
-        
-        for (int i = 0; i < Fractals::WIDTH; i++)
-        {
-             for (int j = 0; j < Fractals::HEIGHT; j++)
-             {
-                 vector<int> positionValue = Fractals::CalculateValue(i, j);
-                 theImage
-                    << positionValue[0] << ' '
-                    << positionValue[1] << ' '
-                    << positionValue[2] << endl;
-             }
-        }
-        theImage.close();
-    }
-    else
-    {
-        cout << "Could not open the file";
-    }
+    FileManager fm;
+    fm.WriteToPPMFile(filename, Fractals::WIDTH, Fractals::HEIGHT, rows);
     
     return;
 }
