@@ -1,8 +1,9 @@
 #include "Fractals.h"
 
+const double Fractals::EulerConstant = std::exp(1.0);
 const double Fractals::WIDTH = 800;
 const double Fractals::HEIGHT = 800;
-const int Fractals::CUTOFF_VALUE = 2000;
+const int Fractals::CUTOFF_VALUE = 1000;
 
 Fractals::Fractals()
 {
@@ -23,6 +24,8 @@ Fractals::Fractals()
     Fractals::colorGradientMap.insert(make_pair(14, vector<int>{204, 128, 0}));
     Fractals::colorGradientMap.insert(make_pair(15, vector<int>{153, 87, 0}));
     Fractals::colorGradientMap.insert(make_pair(16, vector<int>{106, 52, 3}));
+    
+    //setStartPosition();
 }
 
 double Fractals::getWidth(void)
@@ -33,6 +36,12 @@ double Fractals::getWidth(void)
 double Fractals::getHeight(void)
 {
     return Fractals::HEIGHT;
+}
+
+void Fractals::setStartPosition(void)
+{
+    positionReal = - EulerConstant / 7;
+    positionImg = - EulerConstant / 20;
 }
 
 vector<int> Fractals::MapColor(int numberOfIterations)
@@ -65,7 +74,7 @@ vector<int> Fractals::CalculateValue(int a, int b)
     return Fractals::MapColor(numberOfIterations);
 }
 
-void Fractals::Draw(std::string filename)
+void Fractals::DrawMandelbrotSet(std::string filename)
 {
     string path = "data/" + filename + ".ppm";
     

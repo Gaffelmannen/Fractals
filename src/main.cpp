@@ -12,7 +12,7 @@ int main()
     cin>>filename;
     
     Fractals fractals;
-    fractals.Fractals::Draw(filename);
+    fractals.Fractals::DrawMandelbrotSet(filename);
     
     cout << "End" << endl;
 }

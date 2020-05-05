@@ -1,10 +1,16 @@
-CPP=clang++
+#CC=clang++
 CXXFLAGS=-g -Wall -std=c++17
 SRC_DIR=./src
 OBJ_DIR=./obj
 SRC_FILES=$(wildcard $(SRC_DIR)/*.cpp)
 OBJ_FILES=$(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
 EXECUTABLE=fractals
+
+ifeq ($(TARGET),mac)
+	CC = clang++
+else
+	CC = g++
+endif
 
 .PHONY : clean cleanall cleanobj all
 
@@ -23,6 +29,6 @@ $(OBJ_DIR):
 	  mkdir $(OBJ_DIR)
 
 all :
-	    $(CPP) $(CXXFLAGS) -o $(EXECUTABLE) $(SRC_FILES)
+	    $(CC) $(CXXFLAGS) -o $(EXECUTABLE) $(SRC_FILES)
 
    
