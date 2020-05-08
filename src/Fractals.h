@@ -20,10 +20,8 @@ class Fractals
     static const double WIDTH;
     static const double HEIGHT;
     static const int CUTOFF_VALUE;
-    double positionReal = 0;
-    double positionImg = 0;
-    double zoomReal = 0.0;
-    double zoomImg = 0.0;
+    complex<double> positionStart;
+    complex<double> zoomStart;
     int selectedAlgorithm = 0;
     map<int, vector<int>> colorGradientMap;
     void setStartPosition(int);

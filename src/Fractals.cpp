@@ -46,17 +46,17 @@ void Fractals::setStartPosition(int selectedStartPos)
     switch (selectedStartPos)
     {
         case START_POS_SEA_HORSE:
-            positionReal = - EULER_CONSTANT / 7;
-            positionImg = - EULER_CONSTANT / 20;
+            positionStart = complex<double>
+                (- EULER_CONSTANT / 7, - EULER_CONSTANT / 20);
             break;
         case START_POS_VALLEY:
-            positionReal = 0.1643721971153;
-            positionImg = 0.822467633298876;
+            positionStart = complex<double>
+                (0.1643721971153, 0.822467633298876);
             break;
         case START_POS_DEFAULT:
         default:
-            positionReal = 0.0;
-            positionImg = 0.0;
+            positionStart = complex<double>
+                (0.0, 0.0);
             break;
     }
 }
@@ -66,13 +66,13 @@ void Fractals::setStartZoom(int selectedStartZoom)
     switch (selectedStartZoom)
     {
         case START_ZOOM_TWO:
-            zoomReal = - 0.75;
-            zoomImg = 0.1;
+            zoomStart = complex<double>
+                (-0.75, 0.1);
             break;
         case START_ZOOM_ONE:
         default:
-            zoomReal = - 1.5;
-            zoomImg = - 0.5;
+            zoomStart = complex<double>
+                (-1.5,- 0.5);
             break;
     }
 }
@@ -90,17 +90,23 @@ vector<int> Fractals::MapColor(int numberOfIterations)
 
 vector<int> Fractals::CalculateValue(int a, int b)
 {
-    complex<double> point(
-        (double) a / Fractals::getWidth() + zoomReal,
-        (double) b / Fractals::getHeight() + zoomImg
+    complex<double> c
+    (
+        (double) a / Fractals::getWidth() + zoomStart.real(),
+        (double) b / Fractals::getHeight() + zoomStart.imag()
     );
-    complex<double> z(positionReal, positionImg);
+    
+    complex<double> z
+    (
+        positionStart.real(),
+        positionStart.imag()
+    );
     
     unsigned int numberOfIterations = 0;
     
     while (abs(z) < 4.0 && numberOfIterations <= Fractals::CUTOFF_VALUE)
     {
-           z = z * z + point;
+           z = z * z + c;
            numberOfIterations++;
     }
     
@@ -111,14 +117,14 @@ vector<int> Fractals::CalculateValueSquaring(int a, int b)
 {
     complex<double> c
     (
-        (double) a / Fractals::getWidth() + zoomReal,
-        (double) b / Fractals::getHeight() + zoomImg
+        (double) a / Fractals::getWidth() + zoomStart.real(),
+        (double) b / Fractals::getHeight() + zoomStart.imag()
     );
     
     complex<double> z
     (
-        positionReal,
-        positionImg
+        positionStart.real(),
+        positionStart.imag()
     );
     
     double zrsqr = z.real() * z.real();
