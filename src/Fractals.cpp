@@ -10,6 +10,9 @@
 #define ALGORITHM_SQUARING 1
 #define ALGORITHM_DEFAULT 2
 
+#define WRITE_TO_PPM 0
+#define WRITE_TO_JPEG 1
+
 const double Fractals::EULER_CONSTANT = std::exp(1.0);
 const double Fractals::WIDTH = 2000;
 const double Fractals::HEIGHT = 2000;
@@ -152,7 +155,7 @@ vector<int> Fractals::CalculateValueSquaring(int a, int b)
 
 void Fractals::GenerateMandelbrotSet(std::string filename)
 {
-    vector<string> rows;
+    vector<vector<int>> rows;
     
     cout << "Generating Mandelbrot - Begin" << endl;
     auto start = std::chrono::high_resolution_clock::now();
@@ -173,17 +176,12 @@ void Fractals::GenerateMandelbrotSet(std::string filename)
                     break;
             }
 
-            char row[100];
-            sprintf(row, "%i %i %i \n", pos[0], pos[1], pos[2]);
-            rows.push_back(row);
+            rows.push_back(pos);
         }
     }
     
     auto end = std::chrono::high_resolution_clock::now();
     cout << "Generating Mandelbrot - Done" << endl;
-    
-    FileManager fm;
-    fm.WriteToPPMFile(filename, Fractals::WIDTH, Fractals::HEIGHT, rows);
     
     auto elapsed = end - start;
     long long milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
@@ -191,6 +189,20 @@ void Fractals::GenerateMandelbrotSet(std::string filename)
     cout << "Time taken by mandelbrot generation is: " << fixed;
     cout << setprecision(3) << double(milliseconds / 1000.0);
     cout << " seconds " << endl;
+    
+    FileManager* fm = new FileManager();
+    
+    if(WRITE_TO_PPM)
+    {
+        fm->WriteToPPMFile(filename, Fractals::WIDTH, Fractals::HEIGHT, rows);
+    }
+    
+    if(WRITE_TO_JPEG)
+    {
+        fm->WriteToJpegFile(filename, Fractals::WIDTH, Fractals::HEIGHT, rows);
+    }
+    
+    delete fm;
     
     return;
 }
