@@ -162,6 +162,8 @@ void Fractals::GenerateMandelbrotSet(std::string filename)
     
     for (int i = 0; i < Fractals::WIDTH; i++)
     {
+        cerr << "\rRows remaining: " << i-Fractals::WIDTH << ' ' << flush;
+        
         for (int j = 0; j < Fractals::HEIGHT; j++)
         {
             vector<int> pos;

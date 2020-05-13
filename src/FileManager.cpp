@@ -5,7 +5,7 @@ const string FileManager::BASE_DIR = "data/";
 const string FileManager::FILE_ABBREVATION_PPM = ".ppm";
 const string FileManager::FILE_ABBREVATION_JPEG = ".jpg";
 const string FileManager::FILE_ABBREVATION_TXT = ".txt";
-std::ofstream myFile;
+std::ofstream theFile;
 
 FileManager::FileManager()
 {
@@ -54,9 +54,9 @@ int FileManager::WriteToPPMFile(
     return 0;
 }
 
-void myOutput(unsigned char byte)
+void writeOutput(unsigned char byte)
 {
-    myFile << byte;
+    theFile << byte;
 }
 
 int FileManager::WriteToJpegFile(
@@ -70,7 +70,7 @@ int FileManager::WriteToJpegFile(
     int count = 0;
     
     string path = BASE_DIR + filename + FILE_ABBREVATION_JPEG;
-    myFile = std::ofstream(path, std::ios_base::out | std::ios_base::binary);
+    theFile = std::ofstream(path, std::ios_base::out | std::ios_base::binary);
     
     for (auto y = 0; y < height; y++)
     {
@@ -89,7 +89,54 @@ int FileManager::WriteToJpegFile(
     const bool downsample = false;
     const char* comment = "Fractal: Mandelbrot Set Image.";
     
-    auto ok = TooJpeg::writeJpeg(myOutput, image, width, height, isRGB, quality, downsample, comment);
+    auto ok = TooJpeg::writeJpeg(writeOutput, image, width, height, isRGB, quality, downsample, comment);
+    
+    delete[] image;
+    
+    return ok ? 0 : 1;
+}
+
+int FileManager::WriteToJpegFile(
+    string filename,
+    int width,
+    int height,
+    int** canvas)
+{
+    const auto bytesPerPixel = 3;
+    auto image = new unsigned char[width * height * bytesPerPixel];
+    int count = 0;
+    
+    string path = BASE_DIR + filename + FILE_ABBREVATION_JPEG;
+    theFile = std::ofstream(path, std::ios_base::out | std::ios_base::binary);
+    
+    for (int x = 0; x < width; x++)
+    {
+        int* columns = canvas[x];
+        for (int y = 0; y < height; y++)
+        {
+            auto offset = (y * width + x) * bytesPerPixel;
+            if(columns[y] == 1)
+            {
+                image[offset] = 255;
+                image[offset+1] = 255;
+                image[offset+2] = 255;
+            }
+            else
+            {
+                image[offset] = 0;
+                image[offset+1] = 0;
+                image[offset+2] = 0;
+            }
+            count++;
+        }
+    }
+    
+    const bool isRGB = true;
+    const auto quality = 90;
+    const bool downsample = false;
+    const char* comment = "Fractal: Mandelbrot Set Image.";
+    
+    auto ok = TooJpeg::writeJpeg(writeOutput, image, width, height, isRGB, quality, downsample, comment);
     
     delete[] image;
     
