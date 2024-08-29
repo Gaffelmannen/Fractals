@@ -38,7 +38,7 @@ int FileManager::WriteToPPMFile(
         {
             vector<int> pos = rows[i];
             char fields[100];
-            sprintf(fields, "%i %i %i \n", pos[0], pos[1], pos[2]);
+            snprintf(fields, sizeof(fields), "%i %i %i \n", pos[0], pos[1], pos[2]);
             theImage << fields;
         }
          
@@ -104,7 +104,6 @@ int FileManager::WriteToJpegFile(
 {
     const auto bytesPerPixel = 3;
     auto image = new unsigned char[width * height * bytesPerPixel];
-    int count = 0;
     
     string path = BASE_DIR + filename + FILE_ABBREVATION_JPEG;
     theFile = std::ofstream(path, std::ios_base::out | std::ios_base::binary);
@@ -127,7 +126,6 @@ int FileManager::WriteToJpegFile(
                 image[offset+1] = 0;
                 image[offset+2] = 0;
             }
-            count++;
         }
     }
     
