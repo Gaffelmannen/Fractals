@@ -5,6 +5,14 @@
 
 using namespace std;
 
+#define NUMBER_OF_SAMPLES 8
+#define NUMBER_OF_FRAMES 361
+#define NUMBER_OF_MAX_ITERATIONS 256
+
+double randomizer(){
+	return ((double) rand() / (RAND_MAX));
+}
+
 bool isNumeric(const string& s)
 {
     return !s.empty() &&
@@ -49,6 +57,59 @@ void GenerateSierpinskiCarpet()
     sc.DrawSierpinskiCarpet(depth, filename);
 }
 
+void GenerateAnimatedMandelbrot()
+{
+    cout << "Generate animated mandelbrot." << endl;
+
+    cout << "Enter filename: ";
+    std::string mandelbrotfilename;
+    cin >> mandelbrotfilename;
+
+    Fractals::point points[NUMBER_OF_SAMPLES];
+
+	srand(time(0));
+
+	for(int i = 0; i < NUMBER_OF_SAMPLES; i++)
+    {
+		points[i].x = randomizer();
+		points[i].y = randomizer();
+	}
+
+
+	for(int i = 0; i < NUMBER_OF_FRAMES; i++)
+	{
+		cout << "Rendering frame " << i << endl;
+		auto start = chrono::steady_clock::now();
+
+		double t = 2.0 * i / NUMBER_OF_FRAMES - 1;
+
+		ostringstream filename;
+		filename << mandelbrotfilename 
+            << setfill('0') 
+            << setw(ceil(log10(NUMBER_OF_FRAMES))) 
+            << i 
+            << ".ppm";
+        
+        Fractals* f = new Fractals();
+	    f->GenerateMandelbrotAnimation(
+            filename.str(), 
+            t, 
+            NUMBER_OF_MAX_ITERATIONS,
+            points, 
+            NUMBER_OF_SAMPLES
+        );
+        delete f;
+
+
+		auto end = chrono::steady_clock::now();
+		cout    << "Frame " 
+                << i 
+                << " generated in " 
+                << chrono::duration_cast<chrono::milliseconds>(end - start).count() / 1000.0 
+                << "seconds" 
+                << endl;
+	}
+}
 
 int main()
 {
@@ -62,6 +123,7 @@ int main()
         cout << "Menu: " << endl;
         cout << "1. Generate Mandelbrot image." << endl;
         cout << "2. Generate Sierpinski Carpet image." << endl;
+        cout << "3. Generate animated Mandelbrot video." << endl;
         cout << "Press q to quit." << endl;
         cout << " > ";
         
@@ -90,6 +152,9 @@ int main()
                 break;
             case 2:
                 GenerateSierpinskiCarpet();
+                break;
+            case 3:
+                GenerateAnimatedMandelbrot();
                 break;
             default:
                 cout << "Invalid selection.";

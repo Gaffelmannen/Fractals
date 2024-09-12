@@ -29,6 +29,7 @@ class FileManager
     public:
     FileManager(void);
     int WriteToPPMFile(string, int, int, vector<vector<int>>);
+    int WriteToPPMFile(string, int*, int, int);
     int WriteToJpegFile(string, int, int, vector<vector<int>>);
     int WriteToJpegFile(string, int, int, int**);
     map<int, vector<int>> ReadFromGradientFile(string);

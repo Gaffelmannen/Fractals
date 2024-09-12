@@ -54,6 +54,38 @@ int FileManager::WriteToPPMFile(
     return 0;
 }
 
+int FileManager::WriteToPPMFile(string filename, int* pixels, int width, int height)
+{
+	cout << "writing file " << filename << endl;
+
+	ofstream file;
+	file.open(filename);
+
+	if(!file.is_open())
+    {
+		return -1;
+	}
+
+	file << "P3" << endl;
+	file << width << " " << height << endl;
+	file << 255 << endl;
+
+	for(int i = 0; i < width * height; i++)
+    {
+
+		file    << pixels[i * 3] 
+                << " " 
+                << pixels[i * 3 + 1] 
+                << " " 
+                << pixels[i * 3 + 2] 
+                << endl;
+	}
+
+	file.close();
+
+    return 0;
+}
+
 void writeOutput(unsigned char byte)
 {
     theFile << byte;
