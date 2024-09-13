@@ -9,7 +9,8 @@ using namespace std;
 #define NUMBER_OF_FRAMES 361
 #define NUMBER_OF_MAX_ITERATIONS 256
 
-double randomizer(){
+double randomizer()
+{
 	return ((double) rand() / (RAND_MAX));
 }
 
@@ -87,8 +88,7 @@ void GenerateAnimatedMandelbrot()
 		filename << mandelbrotfilename 
             << setfill('0') 
             << setw(ceil(log10(NUMBER_OF_FRAMES))) 
-            << i 
-            << ".ppm";
+            << i;
         
         Fractals* f = new Fractals();
 	    f->GenerateMandelbrotAnimation(

@@ -26,9 +26,11 @@ using namespace std;
 #define WRITE_TO_PPM 0
 #define WRITE_TO_JPEG 1
 
-#define NUMBER_OF_THREADS 5
+#define NUMBER_OF_THREADS 10
 #define MAX_COUNT_X 20000
 #define MAX_COUNT_Y 20000
+
+#define DEBUG 0
 
 
 const double Fractals::EULER_CONSTANT = std::exp(1.0);
@@ -38,7 +40,7 @@ const int Fractals::CUTOFF_VALUE = 100;
 const double Fractals::START_X = -2.5;
 const int Fractals::SIZE_X = 4;
 const double Fractals::SIZE_Y = ((double) SIZE_X / WIDTH * HEIGHT);
-const double Fractals::START_Y = (-SIZE_Y / 2.0);
+const double Fractals::START_Y = (-SIZE_Y / 3.14);
 const int Fractals::TRESHOLD_R = 256;
 const int Fractals::TRESHOLD_G = 64;
 const int Fractals::TRESHOLD_B = 16;
@@ -360,7 +362,7 @@ void Fractals::GenerateMandelbrotAnimation(string filename, double t, int maxIte
 				int x = i / MAX_COUNT_X;
 				int y = i % MAX_COUNT_Y;
 
-				if(x % 100 == 0 && y == 0)
+				if(DEBUG && ( x % 100 == 0 && y == 0))
                 {   
                     cout 
                         << "column " 
@@ -393,7 +395,14 @@ void Fractals::GenerateMandelbrotAnimation(string filename, double t, int maxIte
 	int *pixels = transformation(counters);
 
     FileManager* fm = new FileManager();
-    fm->WriteToPPMFile(filename, pixels, WIDTH, HEIGHT);
+    if(WRITE_TO_PPM)
+    {
+        fm->WriteToPPMFile(filename, pixels, WIDTH, HEIGHT);
+    }
+    if(WRITE_TO_JPEG)
+    {
+        fm->WriteToJpegFile(filename, pixels, WIDTH, HEIGHT);
+    }
     delete fm;
 
 	delete[] threads;

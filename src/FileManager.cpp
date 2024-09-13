@@ -173,6 +173,42 @@ int FileManager::WriteToJpegFile(
     return ok ? 0 : 1;
 }
 
+int FileManager::WriteToJpegFile(string filename, int* pixels, int width, int height)
+{
+	cout << "writing file " << filename << endl;
+
+	const auto bytesPerPixel = 3;
+    auto image = new unsigned char[width * height * bytesPerPixel];
+    
+    string path = BASE_DIR + filename + FILE_ABBREVATION_JPEG;
+
+    theFile = std::ofstream(path, std::ios_base::out | std::ios_base::binary);
+
+    for (auto y = 0; y < height; y++)
+    {
+        for (auto x = 0; x < width; x++)
+        {
+            auto offset = (y * width + x) * bytesPerPixel;
+            image[offset] = pixels[offset];
+            image[offset+1] = pixels[offset+1];
+            image[offset+2] = pixels[offset+2];
+        }
+    }
+    
+    cout << "Writing to file - Done" << endl;
+    
+    const bool isRGB = true;
+    const auto quality = 90;
+    const bool downsample = false;
+    const char* comment = "Fractal: Mandelbrot Set Image.";
+    
+    auto ok = TooJpeg::writeJpeg(writeOutput, image, width, height, isRGB, quality, downsample, comment);
+    
+    delete[] image;
+    
+    return ok ? 0 : 1;
+}
+
 
 map<int, vector<int>> FileManager::ReadFromGradientFile(string filename)
 {
