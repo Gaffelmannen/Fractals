@@ -58,14 +58,8 @@ void GenerateSierpinskiCarpet()
     sc.DrawSierpinskiCarpet(depth, filename);
 }
 
-void GenerateAnimatedMandelbrot()
+void GenerateAnimatedMandelbrot(string mandelbrotfilename)
 {
-    cout << "Generate animated mandelbrot." << endl;
-
-    cout << "Enter filename: ";
-    std::string mandelbrotfilename;
-    cin >> mandelbrotfilename;
-
     Fractals::point points[NUMBER_OF_SAMPLES];
 
 	srand(time(0));
@@ -75,7 +69,6 @@ void GenerateAnimatedMandelbrot()
 		points[i].x = randomizer();
 		points[i].y = randomizer();
 	}
-
 
 	for(int i = 0; i < NUMBER_OF_FRAMES; i++)
 	{
@@ -111,7 +104,7 @@ void GenerateAnimatedMandelbrot()
 	}
 }
 
-int main()
+int menu()
 {
     int choice = 0;
     
@@ -128,6 +121,8 @@ int main()
         cout << " > ";
         
         string input;
+        string mandelbrotfilename;
+        
         cin>>input;
         
         if (input.compare("q") == 0)
@@ -154,7 +149,10 @@ int main()
                 GenerateSierpinskiCarpet();
                 break;
             case 3:
-                GenerateAnimatedMandelbrot();
+                cout << "Generate animated mandelbrot." << endl;
+                cout << "Enter filename: ";
+                cin >> mandelbrotfilename;
+                GenerateAnimatedMandelbrot(mandelbrotfilename);
                 break;
             default:
                 cout << "Invalid selection.";
@@ -165,4 +163,49 @@ int main()
     }
     
     cout << "End" << endl;
+}
+
+int main(int argc, char *argv[])
+{
+    cout << argc << endl;
+    if(argc == 3)
+    {
+        if(isNumeric(argv[1]))
+        {
+            string filename;
+            switch (stoi(argv[1]))
+            {
+                case 1:
+                {
+                    filename = argv[2];
+                    Fractals fractals;
+                    fractals.Fractals::GenerateMandelbrotSet(filename);
+                    break;
+                }
+                case 2:
+                {
+                    int depth = 3;
+                    filename = argv[2];
+                    SierpinskiCarpet sc;
+                    sc.DrawSierpinskiCarpet(depth, filename);
+                    break;
+                }
+                case 3:
+                {
+                    filename = argv[2];
+                    GenerateAnimatedMandelbrot(filename);
+                    break;
+                }
+                default:
+                {
+                    cout << "Invalid selection.";
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        menu();
+    }
 }

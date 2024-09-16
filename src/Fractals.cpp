@@ -41,9 +41,9 @@ const double Fractals::START_X = -2.5;
 const int Fractals::SIZE_X = 4;
 const double Fractals::SIZE_Y = ((double) SIZE_X / WIDTH * HEIGHT);
 const double Fractals::START_Y = (-SIZE_Y / 3.14);
-const int Fractals::TRESHOLD_R = 256;
+const int Fractals::TRESHOLD_R = 16;
 const int Fractals::TRESHOLD_G = 64;
-const int Fractals::TRESHOLD_B = 16;
+const int Fractals::TRESHOLD_B = 256;
 
 
 
