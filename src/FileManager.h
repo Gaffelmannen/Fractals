@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <iterator>
 #include <regex>
+#include <cctype>
 
 #include "../lib/toojpeg.h"
 
@@ -24,6 +25,7 @@ class FileManager
     static const string FILE_ABBREVATION_PPM;
     static const string FILE_ABBREVATION_JPEG;
     static const string FILE_ABBREVATION_TXT;
+    static const string FILE_ABBREVATION_INI;
     void WriteOutput(unsigned char);
     
     public:
@@ -34,6 +36,7 @@ class FileManager
     int WriteToJpegFile(string, int, int, int**);
     int WriteToJpegFile(string, int*, int, int);
     map<int, vector<int>> ReadFromGradientFile(string);
+    map<string, string> ReadFromConfigFile(string);
 };
 
 #endif

@@ -5,6 +5,7 @@ const string FileManager::BASE_DIR = "data/";
 const string FileManager::FILE_ABBREVATION_PPM = ".ppm";
 const string FileManager::FILE_ABBREVATION_JPEG = ".jpg";
 const string FileManager::FILE_ABBREVATION_TXT = ".txt";
+const string FileManager::FILE_ABBREVATION_INI = ".ini";
 std::ofstream theFile;
 
 FileManager::FileManager()
@@ -209,7 +210,6 @@ int FileManager::WriteToJpegFile(string filename, int* pixels, int width, int he
     return ok ? 0 : 1;
 }
 
-
 map<int, vector<int>> FileManager::ReadFromGradientFile(string filename)
 {
     map<int, vector<int>> map;
@@ -257,4 +257,37 @@ map<int, vector<int>> FileManager::ReadFromGradientFile(string filename)
     }
     
     return map;
+}
+
+map<string, string> FileManager::ReadFromConfigFile(string filename)
+{
+    map<string, string> configMap;
+
+    string line;
+    string path = filename + FILE_ABBREVATION_INI;
+
+    ifstream configFile (path);
+    if (configFile.is_open())
+    {
+        while (std::getline(configFile, line))
+        {
+            line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
+
+            std::istringstream is_line(line);
+            std::string key;
+
+            if( std::getline(is_line, key, '=') )
+            {
+                std::string value;
+                if(std::getline(is_line, value) ) 
+                {
+                    configMap.insert(make_pair(key, value));
+                }
+            }
+        }
+    }
+
+    //cout << ".." << configMap.at("CUTOFF_VALUE") << "..";
+
+    return configMap;
 }

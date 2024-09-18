@@ -1,6 +1,9 @@
 .DS_Store
 fractals.*/
 *.ppm
+.vscode/
+fractals
+
 
 # Prerequisites
 *.d

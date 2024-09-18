@@ -41,14 +41,22 @@ class Fractals
     static const double EULER_CONSTANT;
     static const double WIDTH;
     static const double HEIGHT;
-    static const int CUTOFF_VALUE;
     static const double START_X;
     static const int SIZE_X;
     static const double SIZE_Y; 
     static const double START_Y;
-    static const int TRESHOLD_R;
-    static const int TRESHOLD_G;
-    static const int TRESHOLD_B;
+    int cutoff_value;
+    int treshold_R;
+    int treshold_G;
+    int treshold_B;
+
+    int debug;
+    int write_to_ppm;
+    int write_to_jpg;
+    int number_of_threads;
+    int max_count_x;
+    int max_count_y;
+
     complex<double> positionStart;
     complex<double> zoomStart;
     int selectedAlgorithm = 0;

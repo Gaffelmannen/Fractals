@@ -1,13 +1,14 @@
 #include <iostream>
 #include <string>
+
 #include "Fractals.h"
 #include "Sierpinskicarpet.h"
 
 using namespace std;
 
-#define NUMBER_OF_SAMPLES 8
-#define NUMBER_OF_FRAMES 361
-#define NUMBER_OF_MAX_ITERATIONS 256
+int numberOfSamples;
+int numberOfFrames;
+int numberOfMaxIterations;
 
 double randomizer()
 {
@@ -60,36 +61,36 @@ void GenerateSierpinskiCarpet()
 
 void GenerateAnimatedMandelbrot(string mandelbrotfilename)
 {
-    Fractals::point points[NUMBER_OF_SAMPLES];
+    Fractals::point points[numberOfSamples];
 
 	srand(time(0));
 
-	for(int i = 0; i < NUMBER_OF_SAMPLES; i++)
+	for(int i = 0; i < numberOfSamples; i++)
     {
 		points[i].x = randomizer();
 		points[i].y = randomizer();
 	}
 
-	for(int i = 0; i < NUMBER_OF_FRAMES; i++)
+	for(int i = 0; i < numberOfFrames; i++)
 	{
 		cout << "Rendering frame " << i << endl;
 		auto start = chrono::steady_clock::now();
 
-		double t = 2.0 * i / NUMBER_OF_FRAMES - 1;
+		double t = 2.0 * i / numberOfFrames - 1;
 
 		ostringstream filename;
 		filename << mandelbrotfilename 
             << setfill('0') 
-            << setw(ceil(log10(NUMBER_OF_FRAMES))) 
+            << setw(ceil(log10(numberOfFrames))) 
             << i;
         
         Fractals* f = new Fractals();
 	    f->GenerateMandelbrotAnimation(
             filename.str(), 
             t, 
-            NUMBER_OF_MAX_ITERATIONS,
+            numberOfMaxIterations,
             points, 
-            NUMBER_OF_SAMPLES
+            numberOfSamples
         );
         delete f;
 
@@ -104,10 +105,32 @@ void GenerateAnimatedMandelbrot(string mandelbrotfilename)
 	}
 }
 
+int ReadConfigFile()
+{
+    FileManager* fm = new FileManager();
+    int ok = 1;
+
+    try
+    {
+        auto configMap = fm->ReadFromConfigFile("rules");
+        numberOfSamples = stoi(configMap["NUMBER_OF_SAMPLES"]);
+        numberOfFrames = stoi(configMap["NUMBER_OF_FRAMES"]);
+        numberOfMaxIterations = stoi(configMap["NUMBER_OF_MAX_ITERATIONS"]);
+    }
+    catch(exception)
+    {
+        ok = 0;
+    }
+    
+    delete fm;
+
+    return ok ? 0 : 1;
+}
+
 int menu()
 {
     int choice = 0;
-    
+
     cout << "Begin" << endl;
     
     while (1)
@@ -167,6 +190,13 @@ int menu()
 
 int main(int argc, char *argv[])
 {
+    int successfullyReadConfigFile = ReadConfigFile();
+    if(successfullyReadConfigFile==1)
+    {
+        cout << "Failed to read config file. Aborting.";
+        return 1;
+    }
+
     cout << argc << endl;
     if(argc == 3)
     {

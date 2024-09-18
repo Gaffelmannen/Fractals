@@ -1,5 +1,4 @@
 #include "Fractals.h"
-
 #include "hamilton.h"
 
 #include <iostream>
@@ -10,6 +9,7 @@
 #include <thread>
 #include <chrono>
 #include <atomic>
+#include <map>
 
 using namespace std;
 
@@ -23,29 +23,13 @@ using namespace std;
 #define ALGORITHM_SQUARING 1
 #define ALGORITHM_DEFAULT 2
 
-#define WRITE_TO_PPM 0
-#define WRITE_TO_JPEG 1
-
-#define NUMBER_OF_THREADS 10
-#define MAX_COUNT_X 20000
-#define MAX_COUNT_Y 20000
-
-#define DEBUG 0
-
-
 const double Fractals::EULER_CONSTANT = std::exp(1.0);
 const double Fractals::WIDTH = 2000;
 const double Fractals::HEIGHT = 2000;
-const int Fractals::CUTOFF_VALUE = 100;
 const double Fractals::START_X = -2.5;
-const int Fractals::SIZE_X = 4;
+const int Fractals::SIZE_X = 10;
 const double Fractals::SIZE_Y = ((double) SIZE_X / WIDTH * HEIGHT);
 const double Fractals::START_Y = (-SIZE_Y / 3.14);
-const int Fractals::TRESHOLD_R = 16;
-const int Fractals::TRESHOLD_G = 64;
-const int Fractals::TRESHOLD_B = 256;
-
-
 
 struct Rectangle 
 {
@@ -65,14 +49,35 @@ struct DoubleFrame
 
 Fractals::Fractals()
 {
-    FileManager fm;
+    FileManager* fm = new FileManager();
+
+    // Config
+    auto configMap = fm->ReadFromConfigFile("rules");
+    
+    this->debug = stod(configMap["DEBUG"]);
+    this->write_to_ppm = stod(configMap["WRITE_TO_PPM"]);
+    this->write_to_jpg = stoi(configMap["WRITE_TO_JPEG"]);
+    this->number_of_threads = stoi(configMap["NUMBER_OF_THREADS"]);
+    this->max_count_x = stoi(configMap["MAX_COUNT_X"]);
+    this->max_count_y = stoi(configMap["MAX_COUNT_Y"]);
+    
+    this->cutoff_value = stod(configMap["CUTOFF_VALUE"]);
+    this->treshold_R = stoi(configMap["TRESHOLD_R"]);
+    this->treshold_G = stoi(configMap["TRESHOLD_G"]);
+    this->treshold_B = stoi(configMap["TRESHOLD_B"]);
+
+    // Gradients
     map<int, vector<int>> gradient_map =
-        fm.ReadFromGradientFile("gradient-style-four");
+        fm->ReadFromGradientFile("gradient-style-four");
     
     for (int i=0; i < gradient_map.size(); i++)
     {
-        Fractals::colorGradientMap.insert(make_pair(i, gradient_map[i]));
+        Fractals::colorGradientMap.insert(
+            make_pair(i, gradient_map[i])
+        );
     }
+
+    delete fm;
     
     setStartPosition(START_POS_DEFAULT);
     setStartZoom(START_ZOOM_ONE);
@@ -127,7 +132,7 @@ void Fractals::setStartZoom(int selectedStartZoom)
 
 vector<int> Fractals::MapColor(int numberOfIterations)
 {
-    if (numberOfIterations < CUTOFF_VALUE && numberOfIterations > 0)
+    if (numberOfIterations < this->cutoff_value && numberOfIterations > 0)
     {
         int i = numberOfIterations % 16;
         return colorGradientMap[i];
@@ -152,7 +157,7 @@ vector<int> Fractals::CalculateValue(int a, int b)
     
     unsigned int numberOfIterations = 0;
     
-    while (abs(z) < 4.0 && numberOfIterations <= Fractals::CUTOFF_VALUE)
+    while (abs(z) < 4.0 && numberOfIterations <= this->cutoff_value)
     {
            z = z * z + c;
            numberOfIterations++;
@@ -180,7 +185,7 @@ vector<int> Fractals::CalculateValueSquaring(int a, int b)
     
     unsigned int numberOfIterations = 0;
     
-    while (zrsqr + zisqr <= 4.0 && numberOfIterations <= Fractals::CUTOFF_VALUE)
+    while (zrsqr + zisqr <= 4.0 && numberOfIterations <= this->cutoff_value)
     {
         complex<double> z0
         (
@@ -239,12 +244,12 @@ void Fractals::GenerateMandelbrotSet(std::string filename)
     
     FileManager* fm = new FileManager();
     
-    if(WRITE_TO_PPM)
+    if(this->write_to_ppm)
     {
         fm->WriteToPPMFile(filename, Fractals::WIDTH, Fractals::HEIGHT, rows);
     }
     
-    if(WRITE_TO_JPEG)
+    if(this->write_to_jpg)
     {
         fm->WriteToJpegFile(filename, Fractals::WIDTH, Fractals::HEIGHT, rows);
     }
@@ -336,9 +341,9 @@ void Fractals::mandelbrotPartial(Frame* counters, double t, Point p, int maxIter
             int g = zi * WIDTH + zw;
             int b = zi * WIDTH + zw;
 
-			if(iteration <= TRESHOLD_R) counters[r].red++;
-			if(iteration <= TRESHOLD_G) counters[g].green++;
-			if(iteration <= TRESHOLD_B) counters[b].blue++;
+			if(iteration <= this->treshold_R) counters[r].red++;
+			if(iteration <= this->treshold_G) counters[g].green++;
+			if(iteration <= this->treshold_B) counters[b].blue++;
 		}
 	}
 }
@@ -351,24 +356,29 @@ void Fractals::GenerateMandelbrotAnimation(string filename, double t, int maxIte
 
 	Frame *counters = new Frame[WIDTH * HEIGHT]();
 
-	thread *threads = new thread[NUMBER_OF_THREADS];
+    // Thread compatible
+    int maxThreads = this->number_of_threads;
+    int maxCountX = this->max_count_x;
+    int maxCountY = this->max_count_y;
 
-	for(int j = 0; j < NUMBER_OF_THREADS; j++)
+	thread *threads = new thread[maxThreads];
+
+	for(int j = 0; j < maxThreads; j++)
     {
 		threads[j] = thread([&](int start)
         {
-			for(int i = start; i < MAX_COUNT_X * MAX_COUNT_Y; i += NUMBER_OF_THREADS)
+			for(int i = start; i < maxCountX * maxCountY; i += maxThreads)
             {
-				int x = i / MAX_COUNT_X;
-				int y = i % MAX_COUNT_Y;
+				int x = i / maxCountX;
+				int y = i % maxCountY;
 
-				if(DEBUG && ( x % 100 == 0 && y == 0))
+				if(this->debug && ( x % 100 == 0 && y == 0))
                 {   
                     cout 
                         << "column " 
                         << x 
                         << " / " 
-                        << MAX_COUNT_X 
+                        << maxCountX 
                         << endl;
                 }
 
@@ -383,28 +393,26 @@ void Fractals::GenerateMandelbrotAnimation(string filename, double t, int maxIte
 				}
 			}
 		}, j);
-
 	}
 
-	for(int j = 0; j < NUMBER_OF_THREADS; j++)
+	for(int j = 0; j < maxThreads; j++)
     {
-
 		threads[j].join();
 	}
 
 	int *pixels = transformation(counters);
 
     FileManager* fm = new FileManager();
-    if(WRITE_TO_PPM)
+    if(this->write_to_ppm)
     {
         fm->WriteToPPMFile(filename, pixels, WIDTH, HEIGHT);
     }
-    if(WRITE_TO_JPEG)
+    if(this->write_to_jpg)
     {
         fm->WriteToJpegFile(filename, pixels, WIDTH, HEIGHT);
     }
-    delete fm;
 
+    delete fm;
 	delete[] threads;
 	delete[] pixels;
 	delete[] counters;
