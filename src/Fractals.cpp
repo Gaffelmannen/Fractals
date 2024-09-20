@@ -23,13 +23,9 @@ using namespace std;
 #define ALGORITHM_SQUARING 1
 #define ALGORITHM_DEFAULT 2
 
+#define PI 3.14159265359
+
 const double Fractals::EULER_CONSTANT = std::exp(1.0);
-const double Fractals::WIDTH = 2000;
-const double Fractals::HEIGHT = 2000;
-const double Fractals::START_X = -2.5;
-const int Fractals::SIZE_X = 10;
-const double Fractals::SIZE_Y = ((double) SIZE_X / WIDTH * HEIGHT);
-const double Fractals::START_Y = (-SIZE_Y / 3.14);
 
 struct Rectangle 
 {
@@ -66,6 +62,13 @@ Fractals::Fractals()
     this->treshold_G = stoi(configMap["TRESHOLD_G"]);
     this->treshold_B = stoi(configMap["TRESHOLD_B"]);
 
+    this->width = stod(configMap["WIDTH"]);
+    this->height = stoi(configMap["HEIGHT"]);
+    this->startX = stod(configMap["START_X"]);
+    this->sizeX = stod(configMap["SIZE_X"]);
+    this->sizeY = ((double) this->sizeX / this->width * this->height);
+    this->startY = (-this->sizeY / PI);
+
     // Gradients
     map<int, vector<int>> gradient_map =
         fm->ReadFromGradientFile("gradient-style-four");
@@ -86,12 +89,12 @@ Fractals::Fractals()
 
 double Fractals::getWidth(void)
 {
-    return Fractals::WIDTH;
+    return this->width;
 }
 
 double Fractals::getHeight(void)
 {
-    return Fractals::HEIGHT;
+    return this->height;
 }
 
 void Fractals::setStartPosition(int selectedStartPos)
@@ -210,11 +213,11 @@ void Fractals::GenerateMandelbrotSet(std::string filename)
     cout << "Generating Mandelbrot - Begin" << endl;
     auto start = std::chrono::high_resolution_clock::now();
     
-    for (int i = 0; i < Fractals::WIDTH; i++)
+    for (int i = 0; i < this->width; i++)
     {
-        cerr << "\rRows remaining: " << i-Fractals::WIDTH << ' ' << flush;
+        cerr << "\rRows remaining: " << i-this->width << ' ' << flush;
         
-        for (int j = 0; j < Fractals::HEIGHT; j++)
+        for (int j = 0; j < this->height; j++)
         {
             vector<int> pos;
             switch (selectedAlgorithm)
@@ -246,12 +249,12 @@ void Fractals::GenerateMandelbrotSet(std::string filename)
     
     if(this->write_to_ppm)
     {
-        fm->WriteToPPMFile(filename, Fractals::WIDTH, Fractals::HEIGHT, rows);
+        fm->WriteToPPMFile(filename, this->width, this->height, rows);
     }
     
     if(this->write_to_jpg)
     {
-        fm->WriteToJpegFile(filename, Fractals::WIDTH, Fractals::HEIGHT, rows);
+        fm->WriteToJpegFile(filename, this->width, this->height, rows);
     }
     
     delete fm;
@@ -261,10 +264,10 @@ void Fractals::GenerateMandelbrotSet(std::string filename)
 
 int* Fractals::transformation(Frame* frames)
 {
-	int *pixels = new int[WIDTH * HEIGHT * 3];
+	int *pixels = new int[this->width * this->height * 3];
 
 	DoubleFrame maxValues = frames[0];
-	for(int i = 0; i < WIDTH * HEIGHT; i++)
+	for(int i = 0; i < this->width * this->height; i++)
     {
 		if(maxValues.r < frames[i].red) maxValues.r = frames[i].red;
 		if(maxValues.g < frames[i].green) maxValues.g = frames[i].green;
@@ -273,11 +276,11 @@ int* Fractals::transformation(Frame* frames)
 
 	int maxValue = max(max(maxValues.r, maxValues.g), maxValues.b);
 
-	for(int y = 0; y < HEIGHT; y++)
+	for(int y = 0; y < this->height; y++)
     {
-		for(int x = 0; x < WIDTH; x++)
+		for(int x = 0; x < this->width; x++)
         {
-            int frameval = y * WIDTH + x;
+            int frameval = y * this->width + x;
 			DoubleFrame color = frames[frameval];
 			color.r = sqrt(color.r);
 			color.g = sqrt(color.g);
@@ -305,9 +308,9 @@ int* Fractals::transformation(Frame* frames)
 			int cg = max(0.0, min(255.0, color.g * 256));
 			int cb = max(0.0, min(255.0, color.b * 256));
 			
-            int pix1 = (y * WIDTH + x) * 3 + 0;
-            int pix2 = (y * WIDTH + x) * 3 + 1;
-            int pix3 = (y * WIDTH + x) * 3 + 2;
+            int pix1 = (y * this->width + x) * 3 + 0;
+            int pix2 = (y * this->width + x) * 3 + 1;
+            int pix3 = (y * this->width + x) * 3 + 2;
 
 			pixels[pix1] = cr;
 			pixels[pix2] = cg;
@@ -332,14 +335,14 @@ void Fractals::mandelbrotPartial(Frame* counters, double t, Point p, int maxIter
 		iteration++;
 		z = z.multiply(z).add(c);
 
-		int zw = (z.w - render.x) / render.w * WIDTH;
-		int zi = (z.i - render.y) / render.h * HEIGHT;
+		int zw = (z.w - render.x) / render.w * this->width;
+		int zi = (z.i - render.y) / render.h * this->height;
 
-		if(zw >= 0 && zw < WIDTH && zi >= 0 && zi < HEIGHT)
+		if(zw >= 0 && zw < this->width && zi >= 0 && zi < this->height)
         {
-            int r = zi * WIDTH + zw;
-            int g = zi * WIDTH + zw;
-            int b = zi * WIDTH + zw;
+            int r = zi * this->width + zw;
+            int g = zi * this->width + zw;
+            int b = zi * this->width + zw;
 
 			if(iteration <= this->treshold_R) counters[r].red++;
 			if(iteration <= this->treshold_G) counters[g].green++;
@@ -348,18 +351,25 @@ void Fractals::mandelbrotPartial(Frame* counters, double t, Point p, int maxIter
 	}
 }
 
-void Fractals::GenerateMandelbrotAnimation(string filename, double t, int maxIteration, Point *points, int pointsCount)
+void Fractals::GenerateMandelbrotAnimation(
+    string filename, 
+    double t, 
+    int maxIteration, 
+    Point *points, 
+    int pointsCount)
 {
-	Rectangle render = {START_X, START_Y, SIZE_X, SIZE_Y};
-	double sampleDistX = (double) SIZE_X / WIDTH;
-	double sampleDistY = (double) SIZE_Y / HEIGHT;
+    Rectangle render = {this->startX, this->startY, this->sizeX, this->sizeY};
+	double sampleDistX = (double) this->sizeX / this->width;
+	double sampleDistY = (double) this->sizeY / this->height;
 
-	Frame *counters = new Frame[WIDTH * HEIGHT]();
+	Frame *counters = new Frame[this->width * this->height]();
 
     // Thread compatible
     int maxThreads = this->number_of_threads;
     int maxCountX = this->max_count_x;
     int maxCountY = this->max_count_y;
+    int startForX = this->startX;
+    int startForY = this->startY;
 
 	thread *threads = new thread[maxThreads];
 
@@ -386,8 +396,8 @@ void Fractals::GenerateMandelbrotAnimation(string filename, double t, int maxIte
                 {
 					Point p = 
                     {
-						START_X + (x + points[k].x) * sampleDistX,
-						START_Y + (y + points[k].y) * sampleDistY
+						startForX + (x + points[k].x) * sampleDistX,
+						startForY + (y + points[k].y) * sampleDistY
 					};
 					mandelbrotPartial(counters, t, p, maxIteration, render);
 				}
@@ -405,11 +415,11 @@ void Fractals::GenerateMandelbrotAnimation(string filename, double t, int maxIte
     FileManager* fm = new FileManager();
     if(this->write_to_ppm)
     {
-        fm->WriteToPPMFile(filename, pixels, WIDTH, HEIGHT);
+        fm->WriteToPPMFile(filename, pixels, this->width, this->height);
     }
     if(this->write_to_jpg)
     {
-        fm->WriteToJpegFile(filename, pixels, WIDTH, HEIGHT);
+        fm->WriteToJpegFile(filename, pixels, this->width, this->height);
     }
 
     delete fm;

@@ -20,6 +20,7 @@ using namespace std;
 class FileManager
 {
     private:
+    int debug;
     static const string BASE_DIR;
     static const string SETTINGS_DIR;
     static const string FILE_ABBREVATION_PPM;

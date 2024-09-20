@@ -10,7 +10,8 @@ std::ofstream theFile;
 
 FileManager::FileManager()
 {
-    
+    auto configMap = ReadFromConfigFile("rules");
+    this->debug = stoi(configMap["DEBUG"]);
 }
 
 int FileManager::WriteToPPMFile(
@@ -57,24 +58,23 @@ int FileManager::WriteToPPMFile(
 
 int FileManager::WriteToPPMFile(string filename, int* pixels, int width, int height)
 {
-	cout << "writing file " << filename << endl;
+	cout << "Writing file " << filename << endl;
 
-	ofstream file;
-	file.open(filename);
+    string path = BASE_DIR + filename + FILE_ABBREVATION_JPEG;
+    theFile = std::ofstream(path, std::ios_base::out | std::ios_base::binary);
 
-	if(!file.is_open())
+	if(!theFile.is_open())
     {
 		return -1;
 	}
 
-	file << "P3" << endl;
-	file << width << " " << height << endl;
-	file << 255 << endl;
+	theFile << "P3" << endl;
+	theFile << width << " " << height << endl;
+	theFile << 255 << endl;
 
 	for(int i = 0; i < width * height; i++)
     {
-
-		file    << pixels[i * 3] 
+		theFile << pixels[i * 3] 
                 << " " 
                 << pixels[i * 3 + 1] 
                 << " " 
@@ -82,7 +82,7 @@ int FileManager::WriteToPPMFile(string filename, int* pixels, int width, int hei
                 << endl;
 	}
 
-	file.close();
+	theFile.close();
 
     return 0;
 }
@@ -176,7 +176,10 @@ int FileManager::WriteToJpegFile(
 
 int FileManager::WriteToJpegFile(string filename, int* pixels, int width, int height)
 {
-	cout << "writing file " << filename << endl;
+	if(this->debug)
+    {
+        cout << "writing file " << filename << endl;
+    }
 
 	const auto bytesPerPixel = 3;
     auto image = new unsigned char[width * height * bytesPerPixel];
@@ -286,8 +289,6 @@ map<string, string> FileManager::ReadFromConfigFile(string filename)
             }
         }
     }
-
-    //cout << ".." << configMap.at("CUTOFF_VALUE") << "..";
 
     return configMap;
 }
