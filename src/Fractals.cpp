@@ -25,7 +25,7 @@ using namespace std;
 
 #define PI 3.14159265359
 
-const double Fractals::EULER_CONSTANT = std::exp(1.0);
+const double Fractals::EULER_CONSTANT = std::exp(1.0);    
 
 struct Rectangle 
 {
@@ -42,6 +42,15 @@ struct DoubleFrame
 	double r, g, b;
 	DoubleFrame(const Frame& rgb) : r(rgb.red), g(rgb.green), b(rgb.blue) {}
 };
+
+void Fractals::ShowPercent(int part, int whole) 
+{
+    cout    << std::setprecision(4)
+            << "\033[A\33[2KT\r"
+            << ((double)part/(double)whole)*100
+            << "%"
+            << endl;
+}
 
 Fractals::Fractals()
 {
@@ -384,12 +393,7 @@ void Fractals::GenerateMandelbrotAnimation(
 
 				if(this->debug && ( x % 100 == 0 && y == 0))
                 {   
-                    cout 
-                        << "column " 
-                        << x 
-                        << " / " 
-                        << maxCountX 
-                        << endl;
+                    this->ShowPercent(x, maxCountX);
                 }
 
 				for(int k = 0; k < pointsCount; k++)
@@ -412,13 +416,27 @@ void Fractals::GenerateMandelbrotAnimation(
 
 	int *pixels = transformation(counters);
 
+    if(this->debug)
+    {
+        cout << "write_to_ppm=" << this->write_to_ppm << endl;
+        cout << "write_to_jpg=" << this->write_to_jpg << endl;
+    }
+
     FileManager* fm = new FileManager();
     if(this->write_to_ppm)
     {
+        if(this->debug)
+        {
+            cout << "Writing PPM Filename=" << filename << endl;
+        }
         fm->WriteToPPMFile(filename, pixels, this->width, this->height);
     }
     if(this->write_to_jpg)
     {
+        if(this->debug)
+        {
+            cout << "Writing JPG Filename=" << filename << endl;
+        }
         fm->WriteToJpegFile(filename, pixels, this->width, this->height);
     }
 

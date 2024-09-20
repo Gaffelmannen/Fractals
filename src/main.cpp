@@ -73,7 +73,12 @@ void GenerateAnimatedMandelbrot(string mandelbrotfilename)
 
 	for(int i = 0; i < numberOfFrames; i++)
 	{
-		cout << "Rendering frame " << i << endl;
+		cout    << "Rendering frame " 
+                << i + 1
+                << " of " 
+                << numberOfFrames
+                << endl 
+                << endl;
 		auto start = chrono::steady_clock::now();
 
 		double t = 2.0 * i / numberOfFrames - 1;
@@ -93,7 +98,6 @@ void GenerateAnimatedMandelbrot(string mandelbrotfilename)
             numberOfSamples
         );
         delete f;
-
 
 		auto end = chrono::steady_clock::now();
 		cout    << "Frame " 

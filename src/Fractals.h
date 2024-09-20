@@ -68,6 +68,7 @@ class Fractals
     vector<int> MapColor(int);
     void mandelbrotPartial(Frame*, double, Point, int, Rectangle);
     int* transformation(Frame*);
+    void ShowPercent(int, int);
 };
 
 #endif
